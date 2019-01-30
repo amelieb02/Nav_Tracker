@@ -1,0 +1,164 @@
+// Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+#include <SPI.h>
+#include <SD.h>
+#include <Wire.h>
+#include "RTClib.h"
+
+RTC_PCF8523 rtc;
+#define Serial SerialUSB
+
+File logFile;
+
+// change this to match your SD shield or module;
+//     Arduino Ethernet shield: pin 4
+//     Adafruit SD shields and modules: pin 10
+//     Sparkfun SD shield: pin 8
+const int chipSelect = 10;
+
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+void setup () {
+
+  while (!Serial) {
+    delay(1);  // for Leonardo/Micro/Zero
+  }
+
+  Serial.begin(115200);
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1);
+  }
+
+  if (! rtc.initialized()) {
+    Serial.println("RTC is NOT running!");
+    // following line sets the RTC to the date & time this sketch was compiled
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // January 21, 2014 at 3am you would call:
+    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  }
+
+
+  Serial.print("Initializing SD card...");
+  // On the Ethernet Shield, CS is pin 4. It's set as an output by default.
+  // Note that even if it's not used as the CS pin, the hardware SS pin
+  // (10 on most Arduino boards, 53 on the Mega) must be left as an output
+  // or the SD library functions will not work.
+   pinMode(SS, OUTPUT);
+
+  if (!SD.begin(chipSelect)) {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+
+
+  // open the file. note that only one file can be open at a time,
+  // so you have to close this one before opening another.
+  char filename[] = "00000000.CSV";
+
+  DateTime now = rtc.now();
+
+  filename[0] = (now.year()/1000)%10 + '0'; //To get 1st digit from year()
+  filename[1] = (now.year()/100)%10 + '0'; //To get 2nd digit from year()
+  filename[2] = (now.year()/10)%10 + '0'; //To get 3rd digit from year()
+  filename[3] = now.year()%10 + '0'; //To get 4th digit from year()
+  filename[4] = now.month()/10 + '0'; //To get 1st digit from month()
+  filename[5] = now.month()%10 + '0'; //To get 2nd digit from month()
+  filename[6] = now.day()/10 + '0'; //To get 1st digit from day()
+  filename[7] = now.day()%10 + '0'; //To get 2nd digit from day()
+  Serial.println(filename);
+
+   //Check file name exist?
+  if (SD.exists(filename)) {
+    Serial.print(filename);
+    Serial.println(" exists.");
+  }
+  else {
+    Serial.print(filename);
+    Serial.println("doesn't exist. ");
+    Serial.print("Creating new file: ");
+    Serial.println(filename);
+    // logFile = SD.open(filename, FILE_WRITE);
+    // logFile.close();
+  }
+
+  Serial.println("file: ");
+  Serial.println(filename);
+
+  logFile = SD.open(filename, FILE_WRITE);
+
+  // if the file opened okay, write to it:
+  if (logFile) {
+    Serial.print("Writing to test.txt...");
+    logFile.println("testing 1, 2, 6.");
+  // close the file:
+    logFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening test.txt");
+  }
+
+  // re-open the file for reading:
+  logFile = SD.open(filename);
+  if (logFile) {
+    Serial.println(filename);
+
+    // read from the file until there's nothing else in it:
+    while (logFile.available()) {
+      Serial.write(logFile.read());
+    }
+    // close the file:
+    logFile.close();
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("error opening filename.txt");
+  }
+}
+
+
+void loop () {
+//    DateTime now = rtc.now();
+
+//    Serial.print(now.year(), DEC);
+//    Serial.print('/');
+//    Serial.print(now.month(), DEC);
+//    Serial.print('/');
+//    Serial.print(now.day(), DEC);
+//    Serial.print(" (");
+//    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
+//    Serial.print(") ");
+//    Serial.print(now.hour(), DEC);
+//    Serial.print(':');
+ //   Serial.print(now.minute(), DEC);
+//    Serial.print(':');
+//    Serial.print(now.second(), DEC);
+//    Serial.println();
+
+//    Serial.print(" since midnight 1/1/1970 = ");
+//    Serial.print(now.unixtime());
+//    Serial.print("s = ");
+//    Serial.print(now.unixtime() / 86400L);
+//    Serial.println("d");
+//
+    // calculate a date which is 7 days, 12 hours and 30 seconds into the future
+//    DateTime future (now + TimeSpan(7,12,30,6));
+
+//    Serial.print(" now + 7d + 30s: ");
+//    Serial.print(future.year(), DEC);
+//    Serial.print('/');
+//    Serial.print(future.month(), DEC);
+//    Serial.print('/');
+//    Serial.print(future.day(), DEC);
+//    Serial.print(' ');
+//    Serial.print(future.hour(), DEC);
+//    Serial.print(':');
+//    Serial.print(future.minute(), DEC);
+//    Serial.print(':');
+//    Serial.print(future.second(), DEC);
+//    Serial.println();
+
+//    Serial.println();
+//    delay(3000);
+}
